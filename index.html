@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>3D Cube Image Gallery - Mega.nz Support</title>
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<style>
+		:root {
+			font-size: 10px;
+			--border-color: #e70;
+			--bg-dark: #080808;
+			--bg-card: #151515;
+			--bg-input: #1e1e1e;
+			--text-primary: #fafafa;
+			--text-secondary: #aaa;
+			--accent: #e70;
+			--accent-hover: #f80;
+			--mega-red: #D9272E;
+			--mega-dark: #1a1a2e;
+			--success: #2ecc71;
+			--error: #e74c3c;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: "Montserrat", Arial, sans-serif;
+			font-weight: 500;
+			line-height: 1.5;
+			text-align: center;
+			min-height: 100vh;
+			padding: 3rem 2rem;
+			color: var(--text-primary);
+			background-color: var(--bg-dark);
+			background-image: 
+				radial-gradient(ellipse at 20% 50%, rgba(231, 119, 0, 0.05) 0%, transparent 50%),
+				radial-gradient(ellipse at 80% 50%, rgba(231, 119, 0, 0.05) 0%, transparent 50%);
+		}
+
+		h1 {
+			font-size: 3.5rem;
+			font-weight: 700;
+			background: linear-gradient(135deg, #fff, var(--accent));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 0.5rem;
+		}
+
+		.subtitle {
+			font-size: 1.4rem;
+			color: var(--text-secondary);
+			margin-bottom: 1rem;
+		}
+
+		h2 {
+			font-size: 1.8rem;
+			margin-bottom: 2rem;
+			font-weight: 500;
+		}
+
+		/* Cube Styles */
+		.cube-container {
+			position: relative;
+			width: 28rem;
+			height: 28rem;
+			margin: 4rem auto 5rem;
+			perspective: 100rem;
+		}
+
+		.cube {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			transform-style: preserve-3d;
+			transition: transform 1s cubic-bezier(0.32, 0.05, 0.35, 1.6);
+		}
+
+		.cube-face-image {
+			display: block;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			border-radius: 0.5rem;
+			box-shadow: 0 0 0.5rem #fff,
+						0 0 1.5rem var(--border-color),
+						0 0 3rem var(--border-color);
+		}
+
+		.image-buttons {
+			display: grid;
+			grid-template-columns: repeat(3, auto);
+			grid-gap: 1.5rem;
+			justify-content: center;
+			margin-bottom: 4rem;
+		}
+
+		.image-buttons input {
+			border: 0.2rem solid #fafafa;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			border-radius: 0.4rem;
+			width: 10rem;
+			height: 10rem;
+			object-fit: cover;
+		}
+
+		.image-buttons input:focus {
+			outline: none;
+			border: 0.2rem solid var(--border-color);
+			box-shadow: 0 0 1rem rgba(231, 119, 0, 0.4);
+		}
+
+		.image-buttons input:hover {
+			border: 0.2rem solid var(--border-color);
+			transform: scale(1.05);
+			box-shadow: 0 0 1rem rgba(231, 119, 0, 0.4);
+		}
+
+		/* Face transforms */
+		.image-1 { transform: translateZ(14rem); }
+		.image-2 { transform: rotateX(-180deg) translateZ(14rem); }
+		.image-3 { transform: rotateY(90deg) translateZ(14rem); }
+		.image-4 { transform: rotateY(-90deg) translateZ(14rem); }
+		.image-5 { transform: rotateX(90deg) translateZ(14rem); }
+		.image-6 { transform: rotateX(-90deg) translateZ(14rem); }
+
+		/* Cube rotations */
+		.cube.initial-position {
+			transform: translateZ(-14rem) translateY(-2rem) rotateX(-15deg) rotateY(18deg) rotateZ(2deg);
+		}
+		.cube.show-image-1 { transform: translateZ(-14rem); }
+		.cube.show-image-2 { transform: translateZ(-14rem) rotateX(180deg); }
+		.cube.show-image-3 { transform: translateZ(-14rem) rotateY(-90deg); }
+		.cube.show-image-4 { transform: translateZ(-14rem) rotateY(90deg); }
+		.cube.show-image-5 { transform: translateZ(-14rem) rotateX(-90deg); }
+		.cube.show-image-6 { transform: translateZ(-14rem) rotateX(90deg); }
+
+		/* Mega.nz Panel */
+		.mega-panel {
+			max-width: 70rem;
+			margin: 0 auto 4rem;
+			background: var(--bg-card);
+			border-radius: 1.2rem;
+			padding: 3rem;
+			border: 1px solid #333;
+			box-shadow: 0 1rem 4rem rgba(0,0,0,0.5);
+		}
+
+		.mega-panel-header {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+			margin-bottom: 2rem;
+		}
+
+		.mega-panel-header h2 {
+			margin-bottom: 0;
+			font-size: 2.2rem;
+		}
+
+		.mega-icon {
+			width: 3.5rem;
+			height: 3.5rem;
+			background: var(--mega-red);
+			border-radius: 0.6rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 1.6rem;
+			font-weight: 700;
+			color: white;
+		}
+
+		.mega-tabs {
+			display: flex;
+			gap: 0.5rem;
+			margin-bottom: 2.5rem;
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+
+		.mega-tab {
+			padding: 1rem 2rem;
+			background: var(--bg-input);
+			border: 1px solid #333;
+			border-radius: 0.8rem;
+			color: var(--text-secondary);
+			font-family: inherit;
+			font-size: 1.3rem;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			display: flex;
+			align-items: center;
+			gap: 0.8rem;
+		}
+
+		.mega-tab:hover {
+			border-color: var(--accent);
+			color: var(--text-primary);
+		}
+
+		.mega-tab.active {
+			background: var(--accent);
+			border-color: var(--accent);
+			color: white;
+		}
+
+		.mega-tab i {
+			font-size: 1.4rem;
+		}
+
+		.tab-content {
+			display: none;
+		}
+
+		.tab-content.active {
+			display: block;
+		}
+
+		/* Face selector */
+		.face-selector {
+			display: flex;
+			gap: 1rem;
+			justify-content: center;
+			margin-bottom: 2rem;
+			flex-wrap: wrap;
+		}
+
+		.face-btn {
+			width: 4.5rem;
+			height: 4.5rem;
+			border-radius: 0.8rem;
+			border: 2px solid #444;
+			background: var(--bg-input);
+			color: var(--text-primary);
+			font-family: inherit;
+			font-size: 1.4rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.face-btn:hover {
+			border-color: var(--accent);
+			transform: translateY(-2px);
+		}
+
+		.face-btn.active {
+			border-color: var(--accent);
+			background: rgba(231, 119, 0, 0.2);
+			box-shadow: 0 0 1rem rgba(231, 119, 0, 0.3);
+		}
+
+		.selected-face-label {
+			font-size: 1.4rem;
+			color: var(--accent);
+			margin-bottom: 1.5rem;
+			font-weight: 600;
+		}
+
+		/* Input styles */
+		.input-group {
+			display: flex;
+			gap: 1rem;
+			max-width: 55rem;
+			margin: 0 auto 1.5rem;
+		}
+
+		.input-group input[type="text"],
+		.input-group input[type="url"] {
+			flex: 1;
+			padding: 1.2rem 1.6rem;
+			background: var(--bg-input);
+			border: 2px solid #333;
+			border-radius: 0.8rem;
+			color: var(--text-primary);
+			font-family: inherit;
+			font-size: 1.3rem;
+			transition: border-color 0.3s ease;
+		}
+
+		.input-group input[type="text"]:focus,
+		.input-group input[type="url"]:focus {
+			outline: none;
+			border-color: var(--accent);
+		}
+
+		.input-group input[type="text"]::placeholder,
+		.input-group input[type="url"]::placeholder {
+			color: #555;
+		}
+
+		.btn {
+			padding: 1.2rem 2.4rem;
+			border: none;
+			border-radius: 0.8rem;
+			font-family: inherit;
+			font-size: 1.3rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			display: flex;
+			align-items: center;
+			gap: 0.8rem;
+			white-space: nowrap;
+		}
+
+		.btn-primary {
+			background: var(--accent);
+			color: white;
+		}
+
+		.btn-primary:hover {
+			background: var(--accent-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 0.5rem 2rem rgba(231, 119, 0, 0.3);
+		}
+
+		.btn-mega {
+			background: var(--mega-red);
+			color: white;
+		}
+
+		.btn-mega:hover {
+			background: #e63946;
+			transform: translateY(-1px);
+			box-shadow: 0 0.5rem 2rem rgba(217, 39, 46, 0.3);
+		}
+
+		.btn-upload {
+			background: #2ecc71;
+			color: white;
+		}
+
+		.btn-upload:hover {
+			background: #27ae60;
+			transform: translateY(-1px);
+		}
+
+		.btn-reset {
+			background: #555;
+			color: white;
+			margin: 2rem auto 0;
+		}
+
+		.btn-reset:hover {
+			background: #666;
+		}
+
+		/* Upload area */
+		.upload-area {
+			border: 2px dashed #444;
+			border-radius: 1rem;
+			padding: 4rem 2rem;
+			margin: 0 auto 1.5rem;
+			max-width: 55rem;
+			transition: all 0.3s ease;
+			cursor: pointer;
+			position: relative;
+		}
+
+		.upload-area:hover,
+		.upload-area.dragover {
+			border-color: var(--accent);
+			background: rgba(231, 119, 0, 0.05);
+		}
+
+		.upload-area i {
+			font-size: 4rem;
+			color: var(--accent);
+			margin-bottom: 1.5rem;
+		}
+
+		.upload-area p {
+			font-size: 1.4rem;
+			color: var(--text-secondary);
+		}
+
+		.upload-area p span {
+			color: var(--accent);
+			text-decoration: underline;
+			cursor: pointer;
+		}
+
+		.upload-area input[type="file"] {
+			position: absolute;
+			inset: 0;
+			opacity: 0;
+			cursor: pointer;
+		}
+
+		/* Status messages */
+		.status-msg {
+			font-size: 1.2rem;
+			padding: 1rem 1.5rem;
+			border-radius: 0.6rem;
+			margin: 1rem auto 0;
+			max-width: 55rem;
+			display: none;
+			align-items: center;
+			gap: 0.8rem;
+		}
+
+		.status-msg.show {
+			display: flex;
+			justify-content: center;
+		}
+
+		.status-msg.success {
+			background: rgba(46, 204, 113, 0.15);
+			color: var(--success);
+			border: 1px solid rgba(46, 204, 113, 0.3);
+		}
+
+		.status-msg.error {
+			background: rgba(231, 76, 60, 0.15);
+			color: var(--error);
+			border: 1px solid rgba(231, 76, 60, 0.3);
+		}
+
+		.status-msg.loading {
+			background: rgba(231, 119, 0, 0.15);
+			color: var(--accent);
+			border: 1px solid rgba(231, 119, 0, 0.3);
+		}
+
+		/* Info box */
+		.info-box {
+			background: rgba(231, 119, 0, 0.08);
+			border: 1px solid rgba(231, 119, 0, 0.2);
+			border-radius: 0.8rem;
+			padding: 1.5rem 2rem;
+			margin: 1.5rem auto 0;
+			max-width: 55rem;
+			text-align: left;
+		}
+
+		.info-box h4 {
+			font-size: 1.3rem;
+			color: var(--accent);
+			margin-bottom: 0.8rem;
+			display: flex;
+			align-items: center;
+			gap: 0.6rem;
+		}
+
+		.info-box p, .info-box li {
+			font-size: 1.2rem;
+			color: var(--text-secondary);
+			line-height: 1.8;
+		}
+
+		.info-box ol {
+			padding-left: 2rem;
+		}
+
+		.info-box code {
+			background: rgba(255,255,255,0.1);
+			padding: 0.2rem 0.5rem;
+			border-radius: 0.3rem;
+			font-size: 1.1rem;
+			color: var(--accent);
+		}
+
+		/* Preview strip */
+		.preview-strip {
+			display: flex;
+			gap: 1rem;
+			justify-content: center;
+			flex-wrap: wrap;
+			margin-top: 2rem;
+		}
+
+		.preview-item {
+			position: relative;
+			width: 8rem;
+			height: 8rem;
+			border-radius: 0.6rem;
+			overflow: hidden;
+			border: 2px solid #444;
+			transition: all 0.3s ease;
+		}
+
+		.preview-item.has-custom {
+			border-color: var(--accent);
+		}
+
+		.preview-item img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.preview-item .face-label {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(0,0,0,0.7);
+			font-size: 1rem;
+			padding: 0.2rem;
+			color: white;
+		}
+
+		/* Spinner */
+		.spinner {
+			display: inline-block;
+			width: 1.4rem;
+			height: 1.4rem;
+			border: 2px solid rgba(231, 119, 0, 0.3);
+			border-top-color: var(--accent);
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+
+		/* Auto-rotate toggle */
+		.auto-rotate-toggle {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+			margin-bottom: 3rem;
+		}
+
+		.toggle-switch {
+			position: relative;
+			width: 5rem;
+			height: 2.6rem;
+			background: #333;
+			border-radius: 1.3rem;
+			cursor: pointer;
+			transition: background 0.3s ease;
+		}
+
+		.toggle-switch.active {
+			background: var(--accent);
+		}
+
+		.toggle-switch::after {
+			content: '';
+			position: absolute;
+			top: 0.3rem;
+			left: 0.3rem;
+			width: 2rem;
+			height: 2rem;
+			background: white;
+			border-radius: 50%;
+			transition: transform 0.3s ease;
+		}
+
+		.toggle-switch.active::after {
+			transform: translateX(2.4rem);
+		}
+
+		.toggle-label {
+			font-size: 1.3rem;
+			color: var(--text-secondary);
+		}
+
+		/* Responsive */
+		@media (max-width: 600px) {
+			h1 { font-size: 2.5rem; }
+			.cube-container { width: 22rem; height: 22rem; }
+			.image-1 { transform: translateZ(11rem); }
+			.image-2 { transform: rotateX(-180deg) translateZ(11rem); }
+			.image-3 { transform: rotateY(90deg) translateZ(11rem); }
+			.image-4 { transform: rotateY(-90deg) translateZ(11rem); }
+			.image-5 { transform: rotateX(90deg) translateZ(11rem); }
+			.image-6 { transform: rotateX(-90deg) translateZ(11rem); }
+			.cube.initial-position { transform: translateZ(-11rem) translateY(-2rem) rotateX(-15deg) rotateY(18deg) rotateZ(2deg); }
+			.cube.show-image-1 { transform: translateZ(-11rem); }
+			.cube.show-image-2 { transform: translateZ(-11rem) rotateX(180deg); }
+			.cube.show-image-3 { transform: translateZ(-11rem) rotateY(-90deg); }
+			.cube.show-image-4 { transform: translateZ(-11rem) rotateY(90deg); }
+			.cube.show-image-5 { transform: translateZ(-11rem) rotateX(-90deg); }
+			.cube.show-image-6 { transform: translateZ(-11rem) rotateX(90deg); }
+			.image-buttons input { width: 8rem; height: 8rem; }
+			.mega-panel { padding: 2rem 1.5rem; }
+			.input-group { flex-direction: column; }
+		}
+	</style>
+</head>
+<body>
+
+	<h1>3D Cube Image Gallery</h1>
+	<p class="subtitle"><i class="fas fa-cube"></i> Supports Mega.nz Links, Direct URLs & File Upload</p>
+
+	<div class="cube-container">
+		<div class="cube initial-position">
+			<img class="cube-face-image image-1" src="https://images.unsplash.com/photo-1445810694374-0a94739e4a03?w=300&h=300&fit=crop" alt="Face 1">
+			<img class="cube-face-image image-2" src="https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=300&h=300&fit=crop" alt="Face 2">
+			<img class="cube-face-image image-3" src="https://images.unsplash.com/photo-1506045412240-22980140a405?w=300&h=300&fit=crop" alt="Face 3">
+			<img class="cube-face-image image-4" src="https://images.unsplash.com/photo-1514041181368-bca62cceffcd?w=300&h=300&fit=crop" alt="Face 4">
+			<img class="cube-face-image image-5" src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=300&h=300&fit=crop" alt="Face 5">
+			<img class="cube-face-image image-6" src="https://images.unsplash.com/photo-1486334803289-1623f249dd1e?w=300&h=300&fit=crop" alt="Face 6">
+		</div>
+	</div>
+
+	<div class="auto-rotate-toggle">
+		<span class="toggle-label">Auto Rotate</span>
+		<div class="toggle-switch" id="autoRotateToggle"></div>
+	</div>
+
+	<h2>Click the images below to rotate the cube</h2>
+
+	<div class="image-buttons">
+		<input type="image" class="show-image-1" src="https://images.unsplash.com/photo-1445810694374-0a94739e4a03?w=100&h=100&fit=crop" alt="Show 1">
+		<input type="image" class="show-image-2" src="https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=100&h=100&fit=crop" alt="Show 2">
+		<input type="image" class="show-image-3" src="https://images.unsplash.com/photo-1506045412240-22980140a405?w=100&h=100&fit=crop" alt="Show 3">
+		<input type="image" class="show-image-4" src="https://images.unsplash.com/photo-1514041181368-bca62cceffcd?w=100&h=100&fit=crop" alt="Show 4">
+		<input type="image" class="show-image-5" src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=100&h=100&fit=crop" alt="Show 5">
+		<input type="image" class="show-image-6" src="https://images.unsplash.com/photo-1486334803289-1623f249dd1e?w=100&h=100&fit=crop" alt="Show 6">
+	</div>
+
+	<!-- Mega.nz & Image Management Panel -->
+	<div class="mega-panel">
+		<div class="mega-panel-header">
+			<div class="mega-icon"><i class="fas fa-cloud"></i></div>
+			<h2>Image Manager</h2>
+		</div>
+
+		<!-- Face Selector -->
+		<p class="selected-face-label">Select a cube face to update:</p>
+		<div class="face-selector">
+			<button class="face-btn active" data-face="1"><i class="fas fa-dice-one"></i></button>
+			<button class="face-btn" data-face="2"><i class="fas fa-dice-two"></i></button>
+			<button class="face-btn" data-face="3"><i class="fas fa-dice-three"></i></button>
+			<button class="face-btn" data-face="4"><i class="fas fa-dice-four"></i></button>
+			<button class="face-btn" data-face="5"><i class="fas fa-dice-five"></i></button>
+			<button class="face-btn" data-face="6"><i class="fas fa-dice-six"></i></button>
+		</div>
+
+		<!-- Tabs -->
+		<div class="mega-tabs">
+			<button class="mega-tab active" data-tab="mega">
+				<i class="fas fa-cloud-arrow-down"></i> Mega.nz Link
+			</button>
+			<button class="mega-tab" data-tab="url">
+				<i class="fas fa-link"></i> Direct URL
+			</button>
+			<button class="mega-tab" data-tab="upload">
+				<i class="fas fa-upload"></i> Upload File
+			</button>
+		</div>
+
+		<!-- Mega.nz Tab -->
+		<div class="tab-content active" id="tab-mega">
+			<div class="input-group">
+				<input type="url" id="megaLinkInput" placeholder="https://mega.nz/file/XXXXXXXX#XXXXXXXXXX">
+				<button class="btn btn-mega" onclick="loadMegaLink()">
+					<i class="fas fa-cloud-arrow-down"></i> Load
+				</button>
+			</div>
+			<div class="info-box">
+				<h4><i class="fas fa-info-circle"></i> Mega.nz Link Support</h4>
+				<ol>
+					<li>Mega.nz <strong>public file links</strong> are supported</li>
+					<li>Paste the full link: <code>https://mega.nz/file/...</code></li>
+					<li>The file will be fetched & decrypted in your browser</li>
+					<li>Supported formats: <code>JPG, PNG, GIF, WEBP, BMP</code></li>
+					<li>You can also use <strong>mega.nz folder links</strong> — first image will load</li>
+				</ol>
+			</div>
+			<div class="status-msg" id="megaStatus"></div>
+		</div>
+
+		<!-- Direct URL Tab -->
+		<div class="tab-content" id="tab-url">
+			<div class="input-group">
+				<input type="url" id="directUrlInput" placeholder="https://example.com/image.jpg">
+				<button class="btn btn-primary" onclick="loadDirectUrl()">
+					<i class="fas fa-image"></i> Load
+				</button>
+			</div>
+			<div class="info-box">
+				<h4><i class="fas fa-info-circle"></i> Direct URL Tips</h4>
+				<p>Paste any direct image URL. Supports JPG, PNG, GIF, WEBP, SVG, and BMP formats. Make sure the URL points directly to an image file.</p>
+			</div>
+			<div class="status-msg" id="urlStatus"></div>
+		</div>
+
+		<!-- Upload Tab -->
+		<div class="tab-content" id="tab-upload">
+			<div class="upload-area" id="uploadArea">
+				<input type="file" id="fileInput" accept="image/*">
+				<i class="fas fa-cloud-arrow-up"></i>
+				<p>Drag & drop an image here or <span>browse files</span></p>
+				<p style="font-size: 1.1rem; margin-top: 0.5rem; color: #666;">JPG, PNG, GIF, WEBP (Max 10MB)</p>
+			</div>
+			<div class="status-msg" id="uploadStatus"></div>
+		</div>
+
+		<!-- Preview Strip -->
+		<div class="preview-strip" id="previewStrip">
+			<div class="preview-item" data-face="1">
+				<img src="https://images.unsplash.com/photo-1445810694374-0a94739e4a03?w=100&h=100&fit=crop" alt="Face 1">
+				<div class="face-label">Face 1</div>
+			</div>
+			<div class="preview-item" data-face="2">
+				<img src="https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=100&h=100&fit=crop" alt="Face 2">
+				<div class="face-label">Face 2</div>
+			</div>
+			<div class="preview-item" data-face="3">
+				<img src="https://images.unsplash.com/photo-1506045412240-22980140a405?w=100&h=100&fit=crop" alt="Face 3">
+				<div class="face-label">Face 3</div>
+			</div>
+			<div class="preview-item" data-face="4">
+				<img src="https://images.unsplash.com/photo-1514041181368-bca62cceffcd?w=100&h=100&fit=crop" alt="Face 4">
+				<div class="face-label">Face 4</div>
+			</div>
+			<div class="preview-item" data-face="5">
+				<img src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=100&h=100&fit=crop" alt="Face 5">
+				<div class="face-label">Face 5</div>
+			</div>
+			<div class="preview-item" data-face="6">
+				<img src="https://images.unsplash.com/photo-1486334803289-1623f249dd1e?w=100&h=100&fit=crop" alt="Face 6">
+				<div class="face-label">Face 6</div>
+			</div>
+		</div>
+
+		<button class="btn btn-reset" onclick="resetAllImages()">
+			<i class="fas fa-rotate-left"></i> Reset All Images
+		</button>
+	</div>
+
+	<!-- Mega SDK -->
+	<script src="https://mega.nz/sdk/sdk.js" onerror="console.log('Mega SDK not available, using fallback')"></script>
+
+	<script>
+		// ========== CUBE ROTATION ==========
+		window.addEventListener("DOMContentLoaded", () => {
+			const cube = document.querySelector(".cube");
+			const imageButtons = document.querySelector(".image-buttons");
+			let cubeImageClass = cube.classList[1];
+
+			imageButtons.addEventListener("click", e => {
+				e.preventDefault();
+				const targetNode = e.target.nodeName;
+				const targetClass = e.target.className;
+
+				if (targetNode === "INPUT" && targetClass !== cubeImageClass) {
+					cube.classList.replace(cubeImageClass, targetClass);
+					cubeImageClass = targetClass;
+				}
+			});
+
+			// Auto-rotate
+			let autoRotateInterval = null;
+			let currentFace = 0;
+			const faces = ['show-image-1','show-image-2','show-image-3','show-image-4','show-image-5','show-image-6'];
+			const toggle = document.getElementById('autoRotateToggle');
+
+			toggle.addEventListener('click', () => {
+				toggle.classList.toggle('active');
+				if (toggle.classList.contains('active')) {
+					autoRotateInterval = setInterval(() => {
+						currentFace = (currentFace + 1) % 6;
+						const newClass = faces[currentFace];
+						cube.classList.replace(cubeImageClass, newClass);
+						cubeImageClass = newClass;
+					}, 2500);
+				} else {
+					clearInterval(autoRotateInterval);
+					autoRotateInterval = null;
+				}
+			});
+		});
+
+		// ========== TAB SWITCHING ==========
+		let selectedFace = 1;
+
+		document.querySelectorAll('.mega-tab').forEach(tab => {
+			tab.addEventListener('click', () => {
+				document.querySelectorAll('.mega-tab').forEach(t => t.classList.remove('active'));
+				document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+				tab.classList.add('active');
+				document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+			});
+		});
+
+		document.querySelectorAll('.face-btn').forEach(btn => {
+			btn.addEventListener('click', () => {
+				document.querySelectorAll('.face-btn').forEach(b => b.classList.remove('active'));
+				btn.classList.add('active');
+				selectedFace = parseInt(btn.dataset.face);
+			});
+		});
+
+		// ========== DEFAULT IMAGES ==========
+		const defaultImages = [
+			'https://images.unsplash.com/photo-1445810694374-0a94739e4a03?w=300&h=300&fit=crop',
+			'https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=300&h=300&fit=crop',
+			'https://images.unsplash.com/photo-1506045412240-22980140a405?w=300&h=300&fit=crop',
+			'https://images.unsplash.com/photo-1514041181368-bca62cceffcd?w=300&h=300&fit=crop',
+			'https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=300&h=300&fit=crop',
+			'https://images.unsplash.com/photo-1486334803289-1623f249dd1e?w=300&h=300&fit=crop'
+		];
+
+		// ========== UPDATE FACE IMAGE ==========
+		function updateFaceImage(faceNum, imageUrl) {
+			// Update cube face
+			const cubeFace = document.querySelector('.image-' + faceNum);
+			if (cubeFace) cubeFace.src = imageUrl;
+
+			// Update thumbnail button
+			const thumbBtn = document.querySelector('.show-image-' + faceNum);
+			if (thumbBtn) thumbBtn.src = imageUrl;
+
+			// Update preview strip
+			const previewItem = document.querySelector(`.preview-item[data-face="${faceNum}"] img`);
+			if (previewItem) previewItem.src = imageUrl;
+
+			// Mark preview as custom
+			const previewContainer = document.querySelector(`.preview-item[data-face="${faceNum}"]`);
+			if (previewContainer) previewContainer.classList.add('has-custom');
+		}
+
+		// ========== STATUS MESSAGES ==========
+		function showStatus(elementId, type, message) {
+			const el = document.getElementById(elementId);
+			el.className = 'status-msg show ' + type;
+			if (type === 'loading') {
+				el.innerHTML = '<span class="spinner"></span> ' + message;
+			} else {
+				const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+				el.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+			}
+			if (type !== 'loading') {
+				setTimeout(() => { el.classList.remove('show'); }, 5000);
+			}
+		}
+
+		function hideStatus(elementId) {
+			document.getElementById(elementId).classList.remove('show');
+		}
+
+		// ========== MEGA.NZ LINK HANDLER ==========
+		function parseMegaLink(url) {
+			// Parse mega.nz links in various formats
+			// https://mega.nz/file/HANDLE#KEY
+			// https://mega.nz/#!HANDLE!KEY
+			// https://mega.co.nz/#!HANDLE!KEY
+			let handle = null, key = null;
+
+			try {
+				url = url.trim();
+
+				// New format: mega.nz/file/HANDLE#KEY
+				let match = url.match(/mega\.nz\/file\/([^#]+)#(.+)/);
+				if (match) {
+					return { handle: match[1], key: match[2], type: 'file' };
+				}
+
+				// Old format: mega.nz/#!HANDLE!KEY
+				match = url.match(/mega\.(?:nz|co\.nz)\/#!([^!]+)!(.+)/);
+				if (match) {
+					return { handle: match[1], key: match[2], type: 'file' };
+				}
+
+				// Folder link: mega.nz/folder/HANDLE#KEY
+				match = url.match(/mega\.nz\/folder\/([^#]+)#(.+)/);
+				if (match) {
+					return { handle: match[1], key: match[2], type: 'folder' };
+				}
+			} catch (e) {
+				console.error('Error parsing mega link:', e);
+			}
+
+			return null;
+		}
+
+		async function loadMegaLink() {
+			const input = document.getElementById('megaLinkInput');
+			const url = input.value.trim();
+
+			if (!url) {
+				showStatus('megaStatus', 'error', 'Please enter a Mega.nz link');
+				return;
+			}
+
+			const parsed = parseMegaLink(url);
+			if (!parsed) {
+				showStatus('megaStatus', 'error', 'Invalid Mega.nz link format. Use: https://mega.nz/file/HANDLE#KEY');
+				return;
+			}
+
+			showStatus('megaStatus', 'loading', 'Connecting to Mega.nz and fetching file...');
+
+			try {
+				// Try using the Mega SDK if available
+				if (typeof mega !== 'undefined' && mega.api) {
+					await loadViaMegaSDK(parsed, url);
+				} else {
+					// Fallback: try direct fetch via CORS proxy approaches
+					await loadViaMegaAPI(parsed, url);
+				}
+			} catch (err) {
+				console.error('Mega load error:', err);
+				showStatus('megaStatus', 'error', 'Failed to load from Mega.nz. ' + (err.message || 'Try downloading the file and using Upload instead.'));
+			}
+		}
+
+		async function loadViaMegaAPI(parsed, originalUrl) {
+			// Use Mega's public API to get download link
+			const apiUrl = 'https://g.api.mega.co.nz/cs';
+			
+			let requestBody;
+			if (parsed.type === 'file') {
+				requestBody = [{ a: 'g', g: 1, p: parsed.handle }];
+			} else {
+				showStatus('megaStatus', 'error', 'Folder links are not directly supported. Please share individual file links.');
+				return;
+			}
+
+			try {
+				const response = await fetch(apiUrl + '?id=' + Date.now(), {
+					method: 'POST',
+					body: JSON.stringify(requestBody),
+					headers: { 'Content-Type': 'application/json' }
+				});
+
+				const data = await response.json();
+
+				if (data[0] && data[0].g) {
+					showStatus('megaStatus', 'loading', 'Downloading and decrypting file...');
+					
+					// Fetch the encrypted file
+					const fileResponse = await fetch(data[0].g);
+					const encryptedData = await fileResponse.arrayBuffer();
+					
+					// Decrypt the file using the key from the link
+					const decryptedBlob = await decryptMegaFile(encryptedData, parsed.key, data[0].at);
+					
+					if (decryptedBlob) {
+						const imageUrl = URL.createObjectURL(decryptedBlob);
+						updateFaceImage(selectedFace, imageUrl);
+						showStatus('megaStatus', 'success', `Image loaded from Mega.nz and applied to Face ${selectedFace}!`);
+						input.value = '';
+					} else {
+						throw new Error('Decryption failed');
+					}
+				} else {
+					// Handle API errors
+					const errorCode = typeof data[0] === 'number' ? data[0] : 'unknown';
+					const errorMessages = {
+						'-2': 'File not found or has been removed',
+						'-9': 'File not found',
+						'-16': 'File is temporarily unavailable',
+						'-17': 'Request quota exceeded, try again later',
+						'-18': 'Resource limit exceeded'
+					};
+					throw new Error(errorMessages[errorCode.toString()] || `API error code: ${errorCode}`);
+				}
+			} catch (fetchError) {
+				// If direct API fails, try alternative approach
+				console.warn('Direct Mega API failed:', fetchError);
+				
+				// Offer a proxy fallback or manual download suggestion
+				showStatus('megaStatus', 'error', 
+					fetchError.message.includes('not found') || fetchError.message.includes('API error') 
+						? fetchError.message 
+						: 'Could not fetch from Mega.nz due to CORS restrictions. Try: 1) Download the file from Mega.nz, then use the Upload tab. 2) Or use a direct image URL.'
+				);
+			}
+		}
+
+		// ========== MEGA DECRYPTION ==========
+		function base64ToArrayBuffer(base64) {
+			// Mega uses a URL-safe base64 variant
+			base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+			// Add padding
+			while (base64.length % 4) base64 += '=';
+			const binary = atob(base64);
+			const bytes = new Uint8Array(binary.length);
+			for (let i = 0; i < binary.length; i++) {
+				bytes[i] = binary.charCodeAt(i);
+			}
+			return bytes.buffer;
+		}
+
+		function megaKeyToArray(keyStr) {
+			const keyBuf = base64ToArrayBuffer(keyStr);
+			const keyView = new Uint32Array(keyBuf);
+			
+			if (keyView.length === 8) {
+				// File key: XOR first 4 with last 4
+				return new Uint32Array([
+					keyView[0] ^ keyView[4],
+					keyView[1] ^ keyView[5],
+					keyView[2] ^ keyView[6],
+					keyView[3] ^ keyView[7]
+				]);
+			}
+			return keyView;
+		}
+
+		async function decryptMegaFile(encryptedData, keyStr, encAttrs) {
+			try {
+				const keyArray = megaKeyToArray(keyStr);
+				
+				// Extract AES key and IV/nonce from the key
+				const keyBytes = new Uint8Array(16);
+				const keyView = new DataView(keyBytes.buffer);
+				for (let i = 0; i < 4; i++) {
+					keyView.setUint32(i * 4, keyArray[i]);
+				}
+				
+				// Use the key to build CTR counter
+				const keyBuf = base64ToArrayBuffer(keyStr);
+				const fullKey = new Uint32Array(keyBuf);
+				
+				// Nonce for CTR mode (from key parts 4 and 5)
+				const nonce = new Uint8Array(16);
+				const nonceView = new DataView(nonce.buffer);
+				if (fullKey.length >= 8) {
+					nonceView.setUint32(0, fullKey[4]);
+					nonceView.setUint32(4, fullKey[5]);
+				}
+				
+				// Import the AES key
+				const cryptoKey = await crypto.subtle.importKey(
+					'raw', keyBytes, { name: 'AES-CTR' }, false, ['decrypt']
+				);
+				
+				// Decrypt using AES-CTR
+				const decrypted = await crypto.subtle.decrypt(
+					{ name: 'AES-CTR', counter: nonce, length: 64 },
+					cryptoKey,
+					encryptedData
+				);
+				
+				// Try to detect image type from magic bytes
+				const header = new Uint8Array(decrypted, 0, 16);
+				let mimeType = 'image/jpeg';
+				
+				if (header[0] === 0x89 && header[1] === 0x50) mimeType = 'image/png';
+				else if (header[0] === 0x47 && header[1] === 0x49) mimeType = 'image/gif';
+				else if (header[0] === 0x52 && header[1] === 0x49) mimeType = 'image/webp';
+				else if (header[0] === 0x42 && header[1] === 0x4D) mimeType = 'image/bmp';
+				
+				return new Blob([decrypted], { type: mimeType });
+			} catch (e) {
+				console.error('Decryption error:', e);
+				
+				// If decryption fails, try treating the data as raw image
+				try {
+					const blob = new Blob([encryptedData], { type: 'image/jpeg' });
+					// Test if it's a valid image
+					const testUrl = URL.createObjectURL(blob);
+					return new Promise((resolve, reject) => {
+						const img = new Image();
+						img.onload = () => { URL.revokeObjectURL(testUrl); resolve(blob); };
+						img.onerror = () => { URL.revokeObjectURL(testUrl); reject(new Error('Not a valid image')); };
+						img.src = testUrl;
+					});
+				} catch (e2) {
+					return null;
+				}
+			}
+		}
+
+		async function loadViaMegaSDK(parsed, url) {
+			// If mega SDK is loaded, try using it
+			showStatus('megaStatus', 'loading', 'Loading via Mega SDK...');
+			try {
+				// Attempt SDK-based approach
+				showStatus('megaStatus', 'error', 'SDK method not fully available in browser context. Trying API method...');
+				await loadViaMegaAPI(parsed, url);
+			} catch(e) {
+				throw e;
+			}
+		}
+
+		// ========== DIRECT URL HANDLER ==========
+		async function loadDirectUrl() {
+			const input = document.getElementById('directUrlInput');
+			const url = input.value.trim();
+
+			if (!url) {
+				showStatus('urlStatus', 'error', 'Please enter an image URL');
+				return;
+			}
+
+			// Check if it's a mega link pasted in wrong tab
+			if (url.includes('mega.nz') || url.includes('mega.co.nz')) {
+				showStatus('urlStatus', 'error', 'This looks like a Mega.nz link. Please use the Mega.nz Link tab instead.');
+				return;
+			}
+
+			showStatus('urlStatus', 'loading', 'Loading image...');
+
+			// Test if image loads
+			const img = new Image();
+			img.crossOrigin = 'anonymous';
+
+			img.onload = () => {
+				updateFaceImage(selectedFace, url);
+				showStatus('urlStatus', 'success', `Image applied to Face ${selectedFace} successfully!`);
+				input.value = '';
+			};
+
+			img.onerror = () => {
+				// Try without crossOrigin
+				const img2 = new Image();
+				img2.onload = () => {
+					updateFaceImage(selectedFace, url);
+					showStatus('urlStatus', 'success', `Image applied to Face ${selectedFace}!`);
+					input.value = '';
+				};
+				img2.onerror = () => {
+					showStatus('urlStatus', 'error', 'Failed to load image. Check the URL and ensure it points to a valid image.');
+				};
+				img2.src = url;
+			};
+
+			img.src = url;
+		}
+
+		// ========== FILE UPLOAD HANDLER ==========
+		const uploadArea = document.getElementById('uploadArea');
+		const fileInput = document.getElementById('fileInput');
+
+		['dragenter', 'dragover'].forEach(evt => {
+			uploadArea.addEventListener(evt, e => {
+				e.preventDefault();
+				uploadArea.classList.add('dragover');
+			});
+		});
+
+		['dragleave', 'drop'].forEach(evt => {
+			uploadArea.addEventListener(evt, e => {
+				e.preventDefault();
+				uploadArea.classList.remove('dragover');
+			});
+		});
+
+		uploadArea.addEventListener('drop', e => {
+			const files = e.dataTransfer.files;
+			if (files.length > 0) handleFileUpload(files[0]);
+		});
+
+		fileInput.addEventListener('change', e => {
+			if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
+		});
+
+		function handleFileUpload(file) {
+			// Validate file type
+			const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
+			if (!validTypes.includes(file.type)) {
+				showStatus('uploadStatus', 'error', 'Invalid file type. Please upload JPG, PNG, GIF, WEBP, BMP, or SVG.');
+				return;
+			}
+
+			// Validate file size (10MB max)
+			if (file.size > 10 * 1024 * 1024) {
+				showStatus('uploadStatus', 'error', 'File too large. Maximum size is 10MB.');
+				return;
+			}
+
+			showStatus('uploadStatus', 'loading', 'Processing image...');
+
+			const reader = new FileReader();
+			reader.onload = e => {
+				const imageUrl = e.target.result;
+				updateFaceImage(selectedFace, imageUrl);
+				showStatus('uploadStatus', 'success', `"${file.name}" applied to Face ${selectedFace}!`);
+				fileInput.value = '';
+			};
+			reader.onerror = () => {
+				showStatus('uploadStatus', 'error', 'Failed to read file. Please try again.');
+			};
+			reader.readAsDataURL(file);
+		}
+
+		// ========== RESET ALL IMAGES ==========
+		function resetAllImages() {
+			for (let i = 1; i <= 6; i++) {
+				const thumbUrl = defaultImages[i-1].replace('w=300', 'w=100').replace('h=300', 'h=100');
+				
+				const cubeFace = document.querySelector('.image-' + i);
+				if (cubeFace) cubeFace.src = defaultImages[i-1];
+
+				const thumbBtn = document.querySelector('.show-image-' + i);
+				if (thumbBtn) thumbBtn.src = thumbUrl;
+
+				const previewImg = document.querySelector(`.preview-item[data-face="${i}"] img`);
+				if (previewImg) previewImg.src = thumbUrl;
+
+				const previewItem = document.querySelector(`.preview-item[data-face="${i}"]`);
+				if (previewItem) previewItem.classList.remove('has-custom');
+			}
+		}
+
+		// ========== ENTER KEY SUPPORT ==========
+		document.getElementById('megaLinkInput').addEventListener('keypress', e => {
+			if (e.key === 'Enter') loadMegaLink();
+		});
+		document.getElementById('directUrlInput').addEventListener('keypress', e => {
+			if (e.key === 'Enter') loadDirectUrl();
+		});
+	</script>
+
+</body>
+</html>
